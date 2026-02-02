@@ -94,12 +94,39 @@ def display_hangman(tries):
     ]
     return stages[tries]
 
-def play(word):
-    word_completion = '_' * len(word)   # строка, содержащая символы _ на каждую букву задуманного слова
+def get_input(str_input = "Введите \"да\" или \"нет\""):
+    # Принимает строку ввиде аргумента - которую выводит пользователю когда запрашивает ввод
+    # Функция спрашивает у пользователя желает ли он еще и ожидает ввода: "да" или "нет"
+    # Если некорректно, то функция снова вызывается
+    wish = input(str_input)
+
+    if wish.upper() in ('ДА', 'НЕТ'):
+        return wish.upper()
+    else:
+        print('Некорректный ввод')
+        get_input(str_input)
+
+def play(word, clue_flag = 'НЕТ'):
+
+    # строка, содержащая символы _ на каждую букву задуманного слова
+    # или если с подсказкой, то содержит первый и последний символ строки
+    if clue_flag == 'ДА':
+        word_completion = word[0] + ('_' * (len(word) - 2)) + word[-1]
+    else:
+        word_completion = '_' * len(word)
+
     tries_num = 6                       # количество попыток
     guessed = False                    # сигнальная метка, по умолчанию False - означает слово не угадано
     guessed_letters = []               # список уже названных букв
     guessed_words = []                 # список уже названных слов
+
+    # Если первая и/или последняя буква встречаются в слове только раз и они открыты по умолчанию
+    # то записываем их в массив названых букв
+    if word.count(word[0]) == 1 and clue_flag == 'ДА':
+        guessed_letters.append(word[0])
+
+    if word.count(word[-1]) == 1 and clue_flag == 'ДА':
+        guessed_letters.append(word[-1])
 
     print(f'Начальное кол-во попыток = {str(tries_num)}')
     print('Начальное состояние:', display_hangman(tries_num))
@@ -120,7 +147,8 @@ def play(word):
                 print('Необходимо ввести букву или слово символами русского алфавита')
                 cont = True
                 break
-
+    
+    # Если пользователь ввел букву не русского алфавита, то пропускается итерация цикла и снова просит ввод
         if cont:
             continue
 
@@ -128,7 +156,7 @@ def play(word):
 
     # Проверяю вводил ли пользователь такую букву или слово ранее
         if let in guessed_letters:
-            print('Такую букву вы уже вводили, попробуйте другую')
+            print('Такую букву вы уже вводили или она является только первой или только последней буквой в слове, попробуйте другую')
             continue
         elif let in guessed_words:
             print('Такое слово вы уже вводили попробуйте другое')
@@ -184,6 +212,26 @@ while True:
     lvl = input(': ')
 
     if lvl == '1':
-        play(get_world(word_list_easy))
-    # Остановился тут
+        clue_flag = get_input('Желаете что-бы первая и последняя буква загаданного слова отобразились? (да или нет):\n')
+        play(get_world(word_list_easy), clue_flag)
+    elif lvl == '2':
+        clue_flag = get_input('Желаете что-бы первая и последняя буква загаданного слова отобразились? (да или нет):\n')
+        play(get_world(word_list_medium), clue_flag)
+    elif lvl == '3':
+        clue_flag = get_input('Желаете что-бы первая и последняя буква загаданного слова отобразились? (да или нет):\n')
+        play(get_world(word_list_hard), clue_flag)
+    elif lvl == '4':
+        clue_flag = get_input('Желаете что-бы первая и последняя буква загаданного слова отобразились? (да или нет):\n')
+        # Рандомиться один из трех массивов
+        play(get_world(random.choice([word_list_easy, word_list_medium, word_list_hard])), clue_flag)
+    else:
+        print('\nНекорректный ввод. Введите нужное число (1,2,3,4)\n')
+        continue
+
+    wish = get_input('Желаете еще раз? (да или нет):\n')
+
+    if wish == 'ДА':
+        continue
+    else:
+        break
 
